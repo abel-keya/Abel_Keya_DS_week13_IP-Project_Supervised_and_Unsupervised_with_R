@@ -13,7 +13,7 @@ perform supervised learning in R programming language on the advertising dataset
 Perform clustering stating insights drawn from your analysis and visualizations.
 Upon implementation, provide comparisons between the approaches  i.e. K-Means clustering vs Hierarchical clustering highlighting the strengths and limitations of each approach in the context of analysis. 
 
-<img src="dbscan.png" width="500"><img src="kmeans.gif" width="500">
+<img src="dbscan.png" width="400"><img src="kmeans.gif" width="400">
 
 
 ## Data sources
