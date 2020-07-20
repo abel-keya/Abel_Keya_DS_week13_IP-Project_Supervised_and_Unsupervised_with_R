@@ -1,0 +1,718 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+---
+title: "abel_keya_week13_IP_Part2_Final"
+author: "Abel Keya"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+#R PROGRAMMING BASICS: EXPLOLATORY DATA ANALYSIS
+##1. Defining the Question
+To perform explororatory data analysis on a dataset using R programming language.
+a) Specifying the Question
+-Load a dataset
+-preprocess the data
+-find missing values
+-find duplicates
+-find outliers
+-clean data
+-perform Univariate Graphical Exploratory Data Analysis
+-perform Bivariate and Multivariate Graphical Data Analysis.
+
+b)The metric for success 
+-clean dataset
+-perform Univariate Graphical Exploratory Data Analysis
+-perform Bivariate and Multivariate Graphical Data Analysis.
+c)The context
+A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process. She would now like to employ your services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads.
+d)experimental design taken 
+Find and deal with outliers, anomalies, and missing data within the dataset.
+Perform  univariate and bivariate analysis.
+From your insights provide a conclusion and recommendation.
+e) Data Relevance
+The provided data was appropriate for the classification analysis that was needed.
+
+```{r}
+# Save the commands used during the session
+savehistory(file="mylog.Rhistory")
+```
+#2. Reading the Data
+```{r}
+# Install the following packages:
+install.packages("foreign")
+library(foreign)
+install.packages("car")
+install.packages("Hmisc")
+install.packages("reshape")
+```
+
+
+```{r include=FALSE}
+library(dplyr)
+```
+
+```{r}
+shoppers <- read.csv(file = 'online_shoppers_intention.csv')
+```
+3. Checking the Data
+```{r}
+# Previewing the dataset
+# ---
+# 
+head(shoppers)
+
+```
+
+```{r}
+tail(shoppers, n= -10) # All rows but the first 10
+```
+
+```{r}
+edit(shoppers) # Open data editor
+```
+
+```{r}
+str(shoppers) # Provides the structure of the dataset
+```
+
+```{r}
+names(shoppers) # Lists variables in the dataset
+```
+#4. Tidying the Dataset
+
+```{r}
+colSums(is.na(shoppers)) # Number of missing per column/variable
+```
+### FINDING DUPLICATES
+```{r}
+# check dimensions
+dim(shoppers)
+```
+
+```{r}
+#check unique values
+unique_items <- unique(shoppers)
+unique_items
+```
+
+###FIXING MISSING DATA
+```{r}
+# The function complete.cases() returns a logical vector indicating which cases are complete.
+# list rows of data that have missing values
+shoppers[!complete.cases(shoppers),]
+```
+#Removing the missing data
+```{r}
+# The function na.omit() returns the object with listwise deletion of missing values.
+# Creating a new dataset without missing data
+shoppers <- na.omit(shoppers) 
+```
+
+```{r}
+#confirming the dataset
+head(shoppers)
+```
+
+```{r}
+#confirm data types per column
+str(shoppers)
+```
+
+```{r}
+head(shoppers)
+```
+#DESCRIPTIVE STATISTICS FOR THE DATASET
+
+```{r}
+names(shoppers)
+```
+
+
+
+```{r}
+#installing packages for descriptive stats
+if(!require(psych)){install.packages("psych")}
+if(!require(FSA)){install.packages("FSA")}
+if(!require(plyr)){install.packages("plyr")}
+if(!require(boot)){install.packages("boot")}
+if(!require(DescTools)){install.packages("DescTools")}
+```
+
+```{r}
+#DESCRIPTIVE STATISTICS FOR THE DATASET
+names(shoppers)
+#installing packages for descriptive stats
+if(!require(psych)){install.packages("psych")}
+if(!require(FSA)){install.packages("FSA")}
+if(!require(plyr)){install.packages("plyr")}
+if(!require(boot)){install.packages("boot")}
+if(!require(DescTools)){install.packages("DescTools")}
+# summary of descriptive statistics
+library(psych)
+```
+
+```{r}
+describe(shoppers)
+```
+
+
+```{r}
+#statistiscal measures of despersion by groped by male follwed by city
+# Summarize function in the FSA package reports the five-number summary,descriptive statistics for grouped ordinal data.
+library(FSA)
+Summarize(Administrative_Duration ~ ProductRelated + BounceRates,
+          data=shoppers)
+```
+
+#
+```{r}
+# package will summarize all variables in a data frame, listing the frequencies for levels of nominal variables; and for interval/ratio data, the minimum, 1st quartile, median, mean, 3rd quartile, and maximum
+summary(shoppers)
+
+```
+# Skewness and kurtosis among other statistics
+```{r}
+#descriptive statistics for Revenue
+describe(shoppers$Revenue,
+         type=3)         ### Type of calculation for skewness and kurtosis
+```
+
+
+```{r}
+#descriptive statistics for ProductRelated
+describe(shoppers$ProductRelated,
+         type=3)
+```
+
+```{r}
+#descriptive statistics for ProductRelated_Duration
+describe(shoppers$ProductRelated_Duration,
+         type=3)
+```
+```{r}
+#descriptive statistics for ExitRates
+describe(shoppers$ExitRates,
+         type=3)
+```
+
+```{r}
+
+#descriptive statistics for BounceRates
+describe(shoppers$BounceRates,
+         type=3)
+```
+
+```{r}
+names(shoppers)
+```
+
+#UNIVARIATE VISUALIZATIONS ANALYSIS
+1.BARPLOTS
+```{r}
+barplot(table(shoppers$Administrative))
+```
+
+```{r}
+barplot(table(shoppers$ProductRelated))
+```
+2.BOXPLOTS
+
+```{r}
+#names(shoppers)
+```
+
+```{r}
+plot(x = shoppers$Informational_Duration, y = shoppers$BounceRate)
+     
+```
+COUNTPLOT
+```{r}
+counts <- table(shoppers$Region)
+  barplot(counts, main="Frequency of Regions",  xlab="Regions")
+```
+
+```{r}
+counts <- table(shoppers$Month)
+  barplot(counts, main="Frequency of months",  xlab="Month")
+
+```
+```{r}
+#names(shoppers)
+```
+
+```{r}
+#shoppers$Month,shoppers$OperatingSystems+shoppers$Browser+shoppers$Region+shoppers$TrafficType,shoppers$VisitorType+shoppers$Weekend+shoppers$Revenue+shoppers$PageValues+shoppers$SpecialDay
+pairs(~shoppers$Administrative+shoppers$Administrative_Duration+shoppers$Informational+shoppers$Informational_Duration,shoppers$ProductRelated+shoppers$ProductRelated_Duration+shoppers$BounceRates+shoppers$ExitRates, data=shoppers,main="scatterplot matrix  for the shoppers")
+```
+
+```{r}
+barplot(table(shoppers$BounceRates), horiz=TRUE, main="Barplot")
+boxplot(rt(100, 5), main="Boxplot")
+stripchart(sample(1:20, 10, replace=TRUE), method="stack", main="Stripchart")
+pie(table(sample(1:6, 10, replace=TRUE)), main="Piechart")
+```
+
+```{r}
+screen(1)
+barplot(shoppers$ExitRates, main="Barplot")
+screen(2)
+boxplot(sample(1:20, 100, replace=TRUE) ~ gl(4, 25, labels=LETTERS[1:4]),
+        col=rainbow(4), notch=TRUE, main="Boxplot")
+screen(3)
+plot(sample(1:20, 40, replace=TRUE), pch=20, xlab=NA, ylab=NA,
+     main="Scatter plot")
+close.screen(all.screens=TRUE)
+```
+
+#BIVARIATE PLOTS
+
+```{r}
+library("ggplot2")
+ #
+geom_line()
+ggplot(data =shoppers,aes(x=Informational,y=ExitRates))+
+  geom_line()
+
+```
+
+```{r}
+install.packages("corrplot")
+```
+
+##CORRELATIONS
+```{r}
+#Correlation matrix with significance levels (p-value)
+library("Hmisc")
+#rcorr(shoppers, type = c("pearson","spearman"))
+```
+
+
+```{r}
+# flattenCorrMatrix
+# cormat : matrix of the correlation coefficients
+# pmat : matrix of the correlation p-values
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+    )
+}
+```
+
+```{r}
+res2<-rcorr(as.matrix(shoppers[,0:10]))
+flattenCorrMatrix(res2$r, res2$P)
+```
+
+
+```{r}
+install.packages("corrplot")
+```
+
+
+The function chart.Correlation()[ in the package PerformanceAnalytics],is used to display a chart of a correlation matrix.
+```{r}
+install.packages("PerformanceAnalytics")
+```
+#ggcorrplot: Visualization of a correlation matrix using ggplot2
+```{r}
+#gcorrplot can be installed from CRAN as follow:
+install.packages("ggcorrplot")
+```
+
+```{r}
+library(ggcorrplot)
+```
+
+```{r}
+
+# Compute a correlation matrix
+data(shoppers[0:10])
+corr <- round(cor(shoppers[0:10]),1)
+corr
+```
+
+#Correlation matrix visualization
+
+```{r}
+# Reordering the correlation matrix
+# --------------------------------
+# using hierarchical clustering
+ggcorrplot(corr, hc.order = TRUE, outline.col = "white")
+```
+
+
+
+
+```{r}
+# Add correlation coefficients
+# --------------------------------
+# argument lab = TRUE
+ggcorrplot(corr, hc.order = TRUE, type = "lower",
+   lab = TRUE)
+```
+
+#Observations:
+
+
+
+
+#SOLUTION 1:K-MEANS CLUSTERING
+```{r}
+names(shoppers[0:10])
+```
+
+
+```{r}
+# Normalizing the dataset so that no particular attribute 
+# has more impact on clustering algorithm than others.
+# 
+normalize <- function(x){
+  return ((x-min(x)) / (max(x)-min(x)))
+}
+
+shoppers$Administrative<- normalize(shoppers$Administrative)
+shoppers$Administrative_Duration<- normalize(shoppers$Administrative_Duration)
+shoppers$Informational<- normalize(shoppers$Informational)
+shoppers$Informational_Duration <- normalize(shoppers$Informational_Duration)
+shoppers$ProductRelated<- normalize(shoppers$ProductRelated)
+shoppers$ProductRelated_Duration<- normalize(shoppers$ProductRelated_Duration)
+shoppers$BounceRates<- normalize(shoppers$BounceRates)
+shoppers$ExitRates<- normalize(shoppers$ExitRates)
+shoppers$PageValues<- normalize(shoppers$PageValues)
+head(shoppers)
+```
+```{r}
+#check unique values
+unique_items <- unique(shoppers$SpecialDay)
+unique_items
+```
+
+
+
+```{r}
+#check unique values
+unique_items <- unique(shoppers$Month)
+unique_items
+```
+
+```{r}
+# Preprocessing the dataset
+
+shoppers.new<- shoppers[, c(1:10)]
+
+shoppers.class<-shoppers[, "VisitorType"]
+head(shoppers.new)
+```
+
+```{r}
+# Previewing the class column
+head(shoppers.class)
+```
+
+```{r}
+#pkgs <- c("factoextra",  "NbClust")
+#install.packages(pkgs)
+#Load the packages as follow:
+library(factoextra)
+library(NbClust)
+```
+
+```{r}
+#Data preparation
+# Standardize the data
+df <- scale(shoppers[1:10])
+head(df)
+```
+#Determining the optimal number of clusters
+```{r}
+# Elbow method
+#fviz_nbclust(df, kmeans, method = "wss") +
+#    geom_vline(xintercept = 4, linetype = 2)+
+#  labs(subtitle = "Elbow method")
+```
+
+```{r}
+# Silhouette method
+#fviz_nbclust(df, kmeans, method = "silhouette")+
+#  labs(subtitle = "Silhouette method")
+```
+
+
+```{r}
+# Applying the K-means clustering algorithm with no. of centroids(k)=9
+result<- kmeans(shoppers.new,4) 
+```
+
+'
+```{r}
+# Previewing the no. of records in each cluster
+result$size 
+```
+
+```{r}
+# Getting the value of cluster center datapoint value(3 centers for k=3)
+result$centers
+```
+
+
+```{r}
+# cluster vector to show the cluster where each record falls
+result$cluster
+```
+
+
+```{r}
+# Verifying the results of clustering
+par(mfrow = c(2,2), mar = c(5,4,2,2))
+# Plotting data points  distribution in clusters
+plot(shoppers.new[c(1,2)], col = result$cluster)
+```
+
+```{r}
+
+# Plotting data points distribution per "class" attribute in dataset
+plot(shoppers.new[c(1,2)], col = "Blue")
+
+```
+
+```{r}
+# Plotting  data points distribution in clusters
+plot(shoppers.new[c(3,4)], col = result$cluster)
+plot(shoppers.new[c(3,4)], col = "Blue")
+```
+
+```{r}
+# Plotting to data points have been distributions
+# Result of table shows that Cluster 1 corresponds, 
+# Cluster 2 corresponds .
+table(result$cluster)
+```
+
+#SOLUTION 2:HIERARCHICAL CLUSTERING
+
+```{r}
+# use the R function hclust() for hierarchical clustering
+# use the dist() function to compute the Euclidean distance between observations, 
+# d will be the first argument in the hclust() function dissimilarity matrix
+d <- dist(df, method = "euclidean")
+```
+
+
+```{r}
+# hierarchical clustering using the Ward's method
+res.hc <- hclust(d, method = "ward.D2")
+```
+
+```{r}
+#  plot the obtained dendrogram
+plot(res.hc, cex = 0.6, hang = -1)
+```
+
+ALTERNATIVE SOLUTION 2
+```{r}
+library("cluster")
+```
+
+
+```{r}
+# Cut tree into 4 groups
+grp <- cutree(res.hc, k = 4)
+```
+
+
+```{r}
+# Number of members in each cluster
+table(grp)
+```
+
+```{r}
+library(factoextra)
+fviz_cluster(list(data = df, cluster = grp))
+plot(res.hc, cex = 0.6)
+rect.hclust(res.hc, k = 4, border = 2:5)
+```
+
+
+```{r}
+library(factoextra)
+fviz_cluster(list(data = df, cluster = grp))
+```
+
+
+
+```{r}
+# Cut tree into 4 groups
+grp <- cutree(res.hc, k = 4)
+```
+
+
+```{r}
+# Number of members in each cluster
+table(grp)
+```
+
+
+```{r}
+# Change the data frame with training data to a matrix
+#center and scale all variables for equal importance during the SOM training process. 
+data_train_matrix <- as.matrix(scale(df))
+```
+
+```{r}
+library("cluster")
+
+```
+
+SOM-Self-Orgnaizing-Map:A visualization tool for the high dimensional data in 2D
+```{r}
+# Creating Self-organising maps in R
+# Load the kohonen package 
+require(kohonen)
+```
+
+```{r}
+# Create a training data set (rows are samples, columns are variables
+# selecting a subset ofvariables available in "data"
+data_train <- df[, c(1,2,3,4,5,6,7,8,9,10)]
+```
+
+```{r}
+# Change the data frame with training data to a matrix and centering then scale all variables to give them equal importance during
+# the SOM training process. 
+data_train_matrix <- as.matrix(scale(data_train))
+```
+
+```{r}
+# Create the SOM Grid -  specify the size of the training grid prior to training the SOM. Hexagonal and Circular 
+# topologies are possible
+som_grid <- somgrid(xdim = 20, ydim=20, topo="hexagonal")
+```
+
+
+```{r}
+# Finally, train the SOM, options for the number of iterations,
+# the learning rates, and the neighbourhood are available
+som_model <- som(data_train_matrix, 
+    grid=som_grid, 
+    rlen=500, 
+    alpha=c(0.05,0.01), 
+    keep.data = TRUE )
+```
+
+```{r}
+#train the SOM, with the number of iterations,the learning rates, and the neighbourhood are available
+#som_model <- som(data_train_matrix, somgrid(5, 5, "hexagonal"))
+plot(som_model, type="changes")
+```
+
+```{r}
+plot(som_model, type="count", main="Node Counts")
+```
+
+
+```{r}
+#### U-matrix visualisation
+plot(som_model, type="dist.neighbours", main = "SOM neighbour distances")
+```
+
+
+```{r}
+# Weight Vector View
+plot(som_model, type="codes")
+```
+
+```{r}
+coolBlueHotRed <- function(n, alpha = 1) {rainbow(n, end=4/6, alpha=alpha)[n:1]}
+# Kohonen Heatmap creation
+plot(som_model, type = "property",property = getCodes(som_model)[,10], main=colnames(getCodes(som_model))[10],palette.name=coolBlueHotRed)
+```
+
+SOLUTION 3:DBSCAN
+
+```{r}
+#R packages for computing DBSCAN
+#fpc and dbscan for computing density-based clustering
+#factoextra for visualizing clusters
+install.packages("fpc")
+install.packages("dbscan")
+#The function dbscan()
+library("fpc")
+# Compute DBSCAN using fpc package
+set.seed(123)
+db <- fpc::dbscan(df, eps = 0.5, MinPts = 500)
+# Plot DBSCAN results
+plot(db, df, main = "DBSCAN", frame = FALSE)
+```
+
+ 
+```{r}
+#draw the plot above using the function fviz_cluster() [ in factoextra package]:
+#column names are cluster number. Cluster 0 corresponds to outliers (black points in the DBSCAN plot).
+library("factoextra")
+fviz_cluster(db, df, stand = FALSE, ellipse = FALSE, geom = "point")
+```
+ 
+#display the result of fpc::dbscan() function 
+```{r}
+# Print DBSCAN
+print(db)
+```
+ 
+```{r}
+# Cluster membership. Noise/outlier observations are coded as 0
+# A random subset is shown
+db$cluster[sample(1:100, 5)]
+```
+ 
+#determining the optimal eps value
+```{r}
+#computing the  k-nearest neighbor distances in a matrix of points.
+#k-distances are plotted in an ascending order. 
+#determine the “knee”, which corresponds to the optimal eps parameter.
+#A knee corresponds to a threshold where a sharp change occurs along the k-distance curve.
+
+#The function kNNdistplot() [in dbscan package] can be used to draw the k-distance plot
+
+dbscan::kNNdistplot(df, k =  5)
+abline(h = 0.15, lty = 2)
+```
+ 
+ 
+ 
+ 
+```{r}
+df <- as.matrix(df[, 1:10])
+set.seed(123)
+# fpc package
+#Compute DBSCAN using fpc::dbscan() and dbscan::dbscan().the 2 packages are installed:
+#function fpc::dbscan() provides an object of class ‘dbscan’ 
+res.fpc <- fpc::dbscan(df, eps = 0.4, MinPts = 4)
+# dbscan package
+res.db <- dbscan::dbscan(df, 0.4, 4)
+```
+
+```{r}
+# both version produce the same results:
+
+all(res.fpc$cluster == 4)
+
+fviz_cluster(res.fpc, df, geom = "point")
+```
+
+
+
+
+
+
+
