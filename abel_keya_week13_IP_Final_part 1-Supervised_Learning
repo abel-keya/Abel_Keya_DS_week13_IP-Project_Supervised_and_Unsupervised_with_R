@@ -1,0 +1,1153 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+---
+title: "abel_keya_week13_IP_Final"
+author: "Abel Keya"
+date: "July 13, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+#R PROGRAMMING BASICS: EXPLOLATORY DATA ANALYSIS
+##1. Defining the Question
+To perform explororatory data analysis on a dataset using R programming language.
+a) Specifying the Question
+-Load a dataset
+-preprocess the data
+-find missing values
+-find duplicates
+-find outliers
+-clean data
+-perform Univariate Graphical Exploratory Data Analysis
+-perform Bivariate and Multivariate Graphical Data Analysis.
+
+b)The metric for success 
+-clean dataset
+-perform Univariate Graphical Exploratory Data Analysis
+-perform Bivariate and Multivariate Graphical Data Analysis.
+c)The context
+A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process. She would now like to employ your services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads.
+d)experimental design taken 
+Find and deal with outliers, anomalies, and missing data within the dataset.
+Perform  univariate and bivariate analysis.
+From your insights provide a conclusion and recommendation.
+e) Data Relevance
+The provided data was appropriate for the classification analysis that was needed.
+
+```{r}
+# Save the commands used during the session
+savehistory(file="mylog.Rhistory")
+```
+#2. Reading the Data
+```{r}
+
+# Install the following packages:
+if(!require(foreign)){install.packages("foreign")}
+if(!require(car)){install.packages("car")}
+if(!require(Hmisc)){install.packages("Hmisc")}
+if(!require(reshape)){install.packages("reshape")}
+if(!require(dplyr)){install.packages("dplyr")}
+library(foreign)
+library(reshape)
+library(dplyr)
+library(car)
+library(Hmisc)
+```
+
+
+```{r}
+advertising <- read.csv(file = 'advertising.csv')
+```
+3. Checking the Data
+```{r}
+# Previewing the dataset
+# ---
+# 
+head(advertising)
+
+```
+
+```{r}
+if(!require(dplyr)){install.packages("lubridate")}
+if(!require(dplyr)){install.packages("tidyr")}
+library(tidyr)
+library(lubridate)
+```
+```{r}
+#Separating the Timestamp Column into Day,Month and Year
+advertising <- separate(advertising, Timestamp, c("Year", "Month", "Day"))
+head(advertising)
+```
+
+
+```{r}
+head(advertising, n= -10) # All rows but the last 10
+```
+
+```{r}
+tail(advertising) # Last 6 rows
+```
+
+
+```{r}
+summary(advertising) # Provides basic descriptive statistics and frequencies.
+
+```
+
+```{r}
+edit(advertising) # Open data editor
+```
+
+```{r}
+str(advertising) # Provides the structure of the dataset
+```
+
+```{r}
+names(advertising) # Lists variables in the dataset
+```
+#4. Tidying the Dataset
+### FINDING DUPLICATES
+```{r}
+# check dimensions
+dim(advertising)
+```
+
+```{r}
+#check unique values
+unique_items <- unique(advertising)
+unique_items
+```
+
+
+###FIXING MISSING DATA
+
+
+```{r}
+colSums(is.na(advertising)) # Number of missing per column/variable
+```
+
+#Removing the missing data
+```{r}
+# The function na.omit() returns the object with listwise deletion of missing values.
+# Creating a new dataset without missing data
+advertising <- na.omit(advertising) 
+```
+#Renaming variables
+```{r}
+# Using library –-reshape--
+library(reshape)
+advertising <- rename(advertising, c(Daily.Time.Spent.on.Site="time.spent"))
+advertising <- rename(advertising, c(Ad.Topic.Line="topic"))
+advertising <- rename(advertising, c(Daily.Internet.Usage="Usage"))
+advertising <- rename(advertising, c(Clicked.on.Ad ="Clicked"))
+```
+
+```{r}
+#confirming the dataset
+head(advertising)
+```
+
+
+#FEATURE ENGINEERING:FORMATTING TIME/DATE COLUMNS
+
+```{r}
+head(advertising)
+```
+#DESCRIPTIVE STATISTICS FOR THE DATASET
+
+```{r}
+names(advertising)
+```
+
+
+
+```{r}
+#installing packages for descriptive stats
+if(!require(psych)){install.packages("psych")}
+if(!require(FSA)){install.packages("FSA")}
+if(!require(plyr)){install.packages("plyr")}
+if(!require(boot)){install.packages("boot")}
+if(!require(DescTools)){install.packages("DescTools")}
+```
+
+
+```{r}
+#DESCRIPTIVE STATISTICS FOR THE DATASET
+names(advertising)
+#installing packages for descriptive stats
+if(!require(psych)){install.packages("psych")}
+if(!require(FSA)){install.packages("FSA")}
+if(!require(plyr)){install.packages("plyr")}
+if(!require(boot)){install.packages("boot")}
+if(!require(DescTools)){install.packages("DescTools")}
+# summary of descriptive statistics
+library(psych)
+
+describe(advertising)
+```
+
+
+#
+```{r}
+# package will summarize all variables in a data frame, listing the frequencies for levels of nominal variables; and for interval/ratio data, the minimum, 1st quartile, median, mean, 3rd quartile, and maximum
+summary(advertising)
+```
+# Skewness and kurtosis among other statistics
+```{r}
+#descriptive statistics for internet usage
+describe(advertising$Usage,
+         type=3)         ### Type of calculation for skewness and kurtosis
+```
+
+
+#UNIVARIATE VISUALIZATIONS ANALYSIS
+1.BARPLOTS
+```{r}
+barplot(table(advertising$Clicked))
+```
+
+```{r}
+barplot(table(advertising$Male))
+```
+
+COUNTPLOT
+```{r}
+counts <- table(advertising$Day)
+  barplot(counts, main="Frequency of Days",  xlab="Number of Days")
+```
+
+```{r}
+counts <- table(advertising$Month)
+  barplot(counts, main="Frequency of months",  xlab="Number ofmonths")
+
+```
+
+```{r}
+pairs(~advertising$Area.Income+advertising$Clicked+advertising$time.spent+advertising$Usage, data=advertising, main="scatterplot matrix  for the Advertising")
+```
+
+
+#BIVARIATE PLOTS
+
+```{r}
+if(!require(ggplot2)){install.packages("ggplot2")}
+library("ggplot2")
+ #
+geom_line()
+ggplot(data =advertising,aes(x=time.spent,y=Area.Income))+
+  geom_line()
+
+```
+
+```{r}
+if(!require(corrplot)){install.packages("corrplot")}
+library("corrplot")
+```
+#Compute correlation matrix
+```{r}
+# function rcorr() [in Hmisc package] is used to compute the significance levels for pearson and spearman correlations. 
+if(!require(Hmisc)){install.packages("Hmisc")}
+library("Hmisc")
+```
+
+##CORRELATIONS
+```{r}
+#Correlation matrix with significance levels (p-value)
+#rcorr(advertising[0:4], type = c("pearson","spearman"))
+```
+
+```{r}
+res2 <- rcorr(as.matrix(advertising[0:4]))
+res2
+```
+Correlation matrix with significance levels (p-value)
+```{r}
+# Extract the correlation coefficients
+res2$r
+# Extract p-values
+res2$P
+
+```
+
+```{r}
+# flattenCorrMatrix
+# cormat : matrix of the correlation coefficients
+# pmat : matrix of the correlation p-values
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+    )
+}
+```
+
+```{r}
+res2<-rcorr(as.matrix(advertising[,0:4]))
+flattenCorrMatrix(res2$r, res2$P)
+```
+
+
+```{r}
+if(!require(PerformanceAnalytics)){install.packages("PerformanceAnalytics")}
+library("PerformanceAnalytics")
+```
+
+```{r}
+my_data <- advertising[0:4, c(0,1,2,3,4)]
+chart.Correlation(my_data, histogram=TRUE, pch=19)
+```
+
+
+#ggcorrplot: Visualization of a correlation matrix using ggplot2
+```{r}
+if(!require(ggcorrplot)){install.packages("ggcorrplot")}
+library("ggcorrplot")
+```
+
+```{r}
+
+# Compute a correlation matrix
+data(advertising[1:4])
+corr <- round(cor(advertising[1:4]),1)
+corr
+```
+
+```{r}
+# Compute a matrix of correlation p-values
+p.mat <- cor_pmat(advertising[1:4])
+head(p.mat[, 1:4])
+
+```
+#Correlation matrix visualization
+```{r}
+# Visualize the correlation matrix
+# --------------------------------
+# method = "square" (default)
+ggcorrplot(corr)
+```
+
+
+
+```{r}
+# Leave blank on no significant coefficient
+ggcorrplot(corr, p.mat = p.mat, hc.order = TRUE,
+    type = "lower", insig = "blank")
+```
+
+
+```{r}
+names(advertising)
+```
+#SOLUTION 1:REGRESSION ANALYSIS
+
+```{r}
+#installing packages for descriptive stats
+if(!require(psych)){install.packages("psych")}
+if(!require(FSA)){install.packages("FSA")}
+if(!require(plyr)){install.packages("plyr")}
+if(!require(boot)){install.packages("boot")}
+if(!require(DescTools)){install.packages("DescTools")}
+if(!require(tidyverse)){install.packages("tidyverse")}# data manipulation and visualization
+if(!require(modelr)){install.packages("modelr")}# provides easy pipeline modeling functions
+if(!require(broom)){install.packages("broom")} # helps to tidy up model outputs
+if(!require(boot)){install.packages("Hmisc")}
+if(!require(DescTools)){install.packages("reshape")}
+```
+
+```{r}
+#loading the required libraries
+library(psych)  
+library(FSA)     
+library(plyr)     
+library(boot)
+library(DescTools)
+library(tidyverse)  
+library(modelr)     
+library(broom)     
+library(foreign)
+library(Hmisc)  
+library(reshape)  
+```
+
+
+
+```{r}
+set.seed(123)
+sample <- sample(c(TRUE, FALSE), nrow(advertising), replace = T, prob = c(0.6,0.4))
+train <- advertising[sample, ]
+test <- advertising[!sample, ]
+```
+
+```{r}
+model1 <- lm(time.spent ~ Clicked, data = train)
+```
+
+
+
+
+```{r}
+summary(model1)
+```
+
+
+
+
+```{r}
+tidy(model1)# to just print out a tidy version of coefficent results
+```
+
+
+
+
+```{r}
+confint(model1)#to compute the 95% confidence interval for the coefficients
+```
+
+
+
+
+```{r}
+summary(model1)#the RSE at the bottom
+```
+
+
+```{r}
+sigma(model1)#An RSE value of 12586.34 means the actual values  will deviate from the true
+```
+
+
+
+
+```{r}
+#regression line by approximately 12586.34 units, on average.
+sigma(model1)/mean(train$time.spent)
+rsquare(model1, data = train)
+```
+
+
+
+
+```{r}
+ggplot(train, aes(Area.Income, time.spent)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_smooth(se = FALSE, color = "red")
+```
+
+
+
+
+
+```{r}
+# add model diagnostics to our training data
+model1_results <- augment(model1, train)
+```
+
+
+```{r}
+ggplot(model1_results, aes(.fitted, .resid)) +
+  geom_ref_line(h = 0) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  ggtitle("Residuals vs Fitted")
+```
+
+
+
+```{r}
+p1 <- ggplot(model1_results, aes(.fitted, .std.resid)) +
+  geom_ref_line(h = 0) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  ggtitle("Standardized Residuals vs Fitted")
+
+p2 <- ggplot(model1_results, aes(.fitted, sqrt(.std.resid))) +
+  geom_ref_line(h = 0) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  ggtitle("Scale-Location")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+
+
+```{r}
+#normality of our residuals
+#A Q-Q plot plots the distribution of our residuals against the theoretical normal
+q_plot <- qqnorm(model1_results$.resid)
+qq_plot <- qqline(model1_results$.resid)
+```
+
+
+
+```{r}
+# use our model to predict Sales values for our test data by using add_predictions
+(test <- test %>% 
+  add_predictions(model1))
+```
+
+
+
+```{r}
+# test MSE
+test %>% 
+  add_predictions(model1) %>%
+  summarise(MSE = mean((Area.Income - pred)^2))
+```
+
+
+
+```{r}
+# training MSE
+train %>% 
+  add_predictions(model1) %>%
+  summarise(MSE = mean((Area.Income - pred)^2))
+```
+
+
+```{r}
+#+topic+City+Country+Year+Month+Day+Clicked
+#Multiple Regression
+model2 <- lm(time.spent ~ Age + Male+Area.Income+Usage+Clicked, data = train)
+summary(model2)
+```
+
+```{r}
+tidy(model2)
+```
+
+
+
+```{r}
+#confidence intervals around these coefficient estimates
+confint(model2)
+```
+
+
+
+```{r}
+#compare the results from our simple linear regression model (model1) and our multiple regression model (model2)
+list(model1 = broom::glance(model1), model2 = broom::glance(model2))
+```
+
+```{r}
+#Assessing Our Model Visually
+# add model diagnostics to our training data
+model1_results <- model1_results %>%
+  mutate(Model = "Model 1")
+```
+
+```{r}
+model2_results <- augment(model2, train) %>%
+  mutate(Model = "Model 2") %>%
+  rbind(model1_results)
+```
+
+
+
+```{r}
+ggplot(model2_results, aes(.fitted, .resid)) +
+  geom_ref_line(h = 0) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ Model) +
+  ggtitle("Residuals vs Fitted")
+```
+
+SOLUTION2:KNN
+
+
+
+```{r}
+#confirm the date conversion
+str(advertising)
+```
+
+
+```{r}
+# Creating a random number equal 90% of total number of rows
+random_advertising <- sample(1:nrow(advertising),0.9 * nrow(advertising))
+random_advertising
+```
+```{r}
+# The normalization function is created
+nor <-function(x) { (x -min(x))/(max(x)-min(x))}
+# Normalization function is applied to the dataframe
+advertising_nor <- as.data.frame(lapply(advertising[,c(1,2,3,4)], nor))
+advertising_nor
+```
+```{r}
+# The training dataset extracted
+advertising_train <- advertising_nor[random_advertising,]
+# The test dataset extracted
+c <- advertising_nor[-random_advertising,]
+```
+
+```{r}
+# The 1st column of training dataset because it is used to predict about testing dataset
+# convert ordered factor to normal factor
+advertising_target <- as.factor(advertising[random_advertising,10])
+```
+
+
+```{r}
+# The actual values of 1st couln of testing dataset to compaire it with values that will be predicted
+# also convert ordered factor to normal factor
+test_target <- as.factor(advertising[-random_advertising,1])
+```
+
+```{r}
+# Running the knn function
+library(class)
+pr <- knn(advertising_train,advertising_train,cl=advertising_target,k=20)
+```
+
+```{r}
+# Creating the confucion matrix
+tb1 <- table(pr)
+
+```
+
+```{r}
+tb2 <- table(pr[1:100],test_target[1:100])
+tb2
+```
+
+
+
+```{r}
+# Checking the accuracy
+accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+accuracy(tb2)
+```
+
+SOLUTION 3:SVM
+```{r}
+#install the caret package  providing us with 
+# direct access to various functions for KNN, SVM, Decision Tree, Linear Regression
+if(!require(caret)){install.packages("caret")}
+library("caret")
+```
+
+```{r}
+# target variable is at clicked The “p” parameter holds a decimal value in the range of 0-1. It’s to show the percentage of the split. 
+#p=0.7. It means that data split should be done in 70:30 ratio. 
+# So, 70% of the data is used for training and the remaining 30% is for testing the model.
+# - The “list” parameter is for whether to return a list or matrix
+intrain <- createDataPartition(y = advertising$Clicked, p= 0.7, list = FALSE)
+training <- advertising[intrain,]
+testing <- advertising[-intrain,]
+```
+
+```{r}
+#dimensions of out training dataframe and testing dataframe
+# ---
+# 
+dim(training) 
+dim(testing)
+```
+
+```{r}
+#clean the data using the anyNA() method that checks for any null values.
+# ---
+#  
+anyNA(advertising)
+```
+```{r}
+#check the summary of the data by using the summary() function
+# ---
+#  
+summary(advertising)
+```
+
+
+```{r}
+install.packages("e1071")
+```
+
+```{r}
+library(e1071)
+```
+
+
+```{r}
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+svm_Linear <- train(time.spent ~., data = training[1:4], method = "svmLinear",
+trControl=trctrl,
+preProcess = c("center", "scale"),
+tuneLength = 10)
+```
+
+```{r}
+
+# We can then check the result of our train() model as shown below
+# ---
+# 
+svm_Linear
+# We can use the predict() method for predicting results as shown below. 
+# We pass 2 arguements, our trained model and our testing data frame.
+# ---
+# 
+#test_pred <- predict(svm_Linear, newdata = testing)
+#test_pred
+```
+```{r}
+advertising$Year <- NULL
+head(advertising)
+```
+
+
+```{r}
+# Now checking for our accuracy of our model by using a confusion matrix 
+# ---
+# confusionMatrix(table(test_pred, testing$time.spent))
+```
+
+SOLUTION 4:Supervised Learning with R - Naive Bayes
+```{r}
+
+install.packages('tidyverse')
+library(tidyverse)
+
+install.packages('ggplot2')
+library(ggplot2)
+
+install.packages('caret')
+library(caret)
+
+install.packages('caretEnsemble')
+library(caretEnsemble)
+
+install.packages('psych')
+library(psych)
+
+install.packages('Amelia')
+library(Amelia)
+
+install.packages('mice')
+library(mice)
+
+install.packages('GGally')
+library(GGally)
+
+install.packages('rpart')
+library(rpart)
+
+install.packages('randomForest')
+library(randomForest)
+```
+
+```{r}
+# visualize our dataset by checking how many missing values
+# 
+missmap(advertising)
+# We use mice package to predict missing values
+mice_mod <- mice(advertising[, c( "time.spent","Age","Area.Income","Usage","topic","City","Male","Country")], method='rf')
+mice_complete <- complete(mice_mod)
+```
+```{r}
+#transfer the predicted missing values into the main data set
+# ---
+# "time.spent","Age","Area.Income","Usage","topic","City","Male","Country"
+advertising$time.spent<- mice_complete$time.spent
+advertising$Age <- mice_complete$Age
+advertising$Area.Income <- mice_complete$Area.Income
+advertising$Usage<- mice_complete$Usage
+advertising$topic <- mice_complete$topic
+advertising$City <- mice_complete$City
+advertising$Male<- mice_complete$Male
+advertising$Country <- mice_complete$Country
+```
+
+```{r}
+# checking whether there are still many missing values
+# ---
+# 
+missmap(advertising)
+```
+
+```{r}
+
+# Creating visualisations to take a look at each variable
+# ---
+# Visualisation 1
+# 
+ggplot(advertising, aes(time.spent, colour = Clicked)) +
+geom_freqpoly(binwidth = 1) + labs(title="time.spent Distribution by Clicked")
+```
+```{r}
+# Visualisation 2
+# ---
+# 
+c <- ggplot(advertising, aes(x=Age, fill=Clicked, color=Clicked)) +
+geom_histogram(binwidth = 1) + labs(title="Age Distribution by Clicked")
+c + theme_bw()
+```
+
+```{r}
+# Visualisation 3
+# ---
+# "Area.Income"
+P <- ggplot(advertising, aes(x=time.spent, fill=Area.Income, color=Clicked)) +
+geom_histogram(binwidth = 1) + labs(title="Area.Income Distribution by Clicked")
+P + theme_bw()
+```
+
+```{r}
+#,"Usage"
+
+# Visualisation 4
+# ---
+# 
+ggplot(advertising, aes(Usage, colour = Clicked)) +
+geom_freqpoly(binwidth = 1) + labs(title="Usage Distribution by Clicked")
+```
+
+```{r}
+
+# Visualisation 5
+# ---
+# 
+ggplot(advertising, aes(Male, colour = Clicked)) +
+geom_freqpoly(binwidth = 1) + labs(title="Male Distribution by Outcome")
+```
+
+
+```{r}
+# Splitting data into training and test data sets
+# ---
+# 
+Train <- createDataPartition(y = advertising$Clicked,p = 0.75,list = FALSE)
+training <- advertising[Train,]
+testing <- advertising[-Train,]
+```
+
+```{r}
+# Checking dimensions of the split
+prop.table(table(advertising$Clicked)) * 100
+prop.table(table(training$Clicked)) * 100
+prop.table(table(testing$Clicked)) * 100
+```
+
+# Comparing the outcome of the training and testing phase
+# ---
+# Creating objects x which holds the predictor variables and y which holds the response variables
+
+
+
+
+SOLUTION 5:DECISION -TREE
+
+```{r}
+Model_1 <- rpart(Clicked ~ ., data = advertising,
+           method = "class")
+
+#rpart.plot(Model_1)
+
+
+```
+
+```{r}
+p <- predict(Model_1, advertising, type = "class")
+#table(p, advertising$Class)
+```
+
+
+
+```{r}
+# Training the model
+#model <- train(Clicked ~ .,
+ #              data = advertising,
+#               method = "Usage",
+#               tuneLength = 5)
+```
+
+```{r}
+set.seed(42)
+myGrid <- expand.grid(advertising = c(5, 10, 20, 40, 60),
+                     splitrule = c("gini", "extratrees"),
+                     min.node.size = 10)
+```
+
+```{r}
+#install.packages("ranger")
+```
+
+```{r}
+#library(ranger)
+```
+
+
+```{r}
+#model <- train(Clicked ~ .,
+#               data = advertising,
+#               method = "Usage", 
+ #              tuneGrid = myGrid,
+#               trControl = trainControl(method = "cv",
+ #                                      number = 5,
+ #                                      verboseIter = FALSE))
+```
+
+
+```{r}
+# Printing the model
+#model
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# installing the party package. It will automatically load other
+# dependent packages.
+install.packages("party")
+```
+
+
+```{r}
+# Load the party package. 
+library(party)
+```
+
+```{r}
+# Creating the input data frame.
+input.dat <- advertising[c(1:4),]
+```
+
+```{r}
+names(advertising[1:4])
+```
+
+```{r}
+# Creating the tree.
+output.tree <- ctree(
+Age ~ time.spent + Area.Income + Usage, #+ topic + City + Male + Country + Country, 
+data = input.dat)
+```
+
+```{r}
+# Plotting the tree.
+plot(output.tree)
+```
+```{r}
+#installing packages for descriptive stats
+if(!require(ggplot2)){install.packages("ggplot2")}# for awesome plotting
+# Modeling packages
+if(!require(rpart.plot)){install.packages("rpart.plot")}# for plotting decision trees
+if(!require(vip)){install.packages("vip")} # for feature importance
+if(!require(pdp)){install.packages("pdp")}
+if(!require(DescTools)){install.packages("DescTools")}
+if(!require(tidyverse)){install.packages("tidyverse")}# data manipulation 
+```
+
+
+```{r}
+# Helper packages
+library(dplyr) # for data wrangling
+library(ggplot2) # for awesome plotting
+# Modeling packages
+library(rpart) # direct engine for decision tree application
+library(caret) # meta engine for decision tree application
+# Model interpretability packages
+library(rpart.plot) # for plotting decision trees
+library(vip) # for feature importance
+library(pdp) # for feature effects
+```
+
+```{r}
+#fit a regression tree using rpart and then visualize it using rpart.plot
+#rpart() is automatically applying a range of cost complexity (\(\alpha\) values to prune the tree). To compare the error for each \(\alpha\) value, rpart() performs a 10-fold CV (by default)
+advert <- rpart(
+formula = time.spent ~ .,
+data = advertising[1:4],
+method = "anova"
+)
+advert
+```
+
+
+```{r}
+rpart.plot(advert)
+```
+
+```{r}
+#Pruning complexity parameter (cp) plot illustrating the relative cross validationerror (y-axis) for various cp values (lower x-axis). Smaller cp values lead to larger trees (upperx-axis)
+# can force rpart() to generate a full tree by setting cp = 0 (no penalty results in a fully grown tree
+plotcp(advert)
+```
+```{r}
+advert2 <- rpart(
+formula = time.spent ~ .,
+data = advertising[1:4],
+method = "anova",
+control = list(cp = 0, xval = 10)
+) 
+plotcp(advert2)
+abline(v = 11, lty = "dashed")
+```
+
+
+
+```{r}
+# rpart cross validation results
+advert2$cptable
+```
+
+```{r}
+# caret cross validation results
+advert3 <- train(
+time.spent ~ .,
+data = advertising[1:4],
+method = "rpart",
+trControl = trainControl(method = "cv", number = 10),
+tuneLength = 20
+) 
+ggplot(advert3)
+```
+```{r}
+#Feature interpretation
+#To measure feature importance, the reduction in the loss function (e.g., SSE) attributed toeach variable at each split is tabulated
+vip(advert3, num_features = 4, bar = FALSE)
+```
+#Bootstrap aggregating (bagging) prediction models(Bagging)
+```{r}
+#installing packages for descriptive stats
+if(!require(doParallel)){install.packages("doParallel")}# for awesome plotting
+# Modeling packages
+if(!require(foreach)){install.packages("foreach")}# for plotting decision trees
+if(!require(ipred)){install.packages("ipred")} # for feature importance
+```
+
+
+```{r}
+# Helper packages
+library(dplyr) # for data wrangling
+library(ggplot2) # for awesome plotting
+library(doParallel) # for parallel backend to foreach
+library(foreach) # for parallel processing with for loops
+# Modeling packages
+library(caret) # for general model fitting
+library(rpart) # for fitting decision trees
+library(ipred) # for fitting bagged decision trees
+```
+
+```{r}
+#The bagging() function comes from the ipred package and we use nbagg to
+#control how many iterations to include in the bagged model and coob = TRUE
+#indicates to use the OOB error rate. By default, bagging() uses
+#rpart::rpart() for decision tree base learners
+# train bagged model
+advert <- bagging(
+formula = time.spent ~ .,
+data = advertising[1:4],
+nbagg = 100,
+coob = TRUE,
+control = rpart.control(minsplit = 2, cp = 0)
+) 
+advert
+##
+
+
+
+```
+
+
+```{r}
+#apply bagging within caret and use 10-fold CV 
+advert_bag2 <- train(
+time.spent ~ .,
+data = advertising[1:4],
+method = "treebag",
+trControl = trainControl(method = "cv", number = 10),
+nbagg = 200,
+control = rpart.control(minsplit = 2, cp = 0)
+) 
+advert_bag2
+```
+#Random Forests
+#Random forests are a modification of bagged decision trees that build a large collection of decorrelated trees to further improve predictive performance
+```{r}
+# Modeling packages
+if(!require(ranger)){install.packages("ranger")}# for plotting decision trees
+if(!require(h2o)){install.packages("h2o")} # for feature importance
+```
+
+```{r}
+# Helper packages
+library(dplyr) # for data wrangling
+library(ggplot2) # for awesome graphics
+# Modeling packages
+library(ranger) # a c++ implementation of random forest
+library(h2o) # a java-based implementation of random forest
+```
+
+```{r}
+# number of features
+n_features <- length(setdiff(names(advertising[1:4]), "time.spent"))
+# train a default random forest model
+advert_rf1 <- ranger(
+time.spent ~ .,
+data = advertising[1:4],
+mtry = floor(n_features / 3),
+respect.unordered.factors = "order",
+seed = 123
+) 
+#get OOB RMSE
+(default_rmse <- sqrt(advert_rf1$prediction.error))
+```
+
+```{r}
+# create hyperparameter grid
+hyper_grid <- expand.grid(
+mtry = floor(n_features * c(.05, .15, .25, .333, .4)),
+min.node.size = c(1, 3, 5, 10),
+replace = c(TRUE, FALSE),
+sample.fraction = c(.5, .63, .8),
+rmse = NA
+) 
+#execute full cartesian grid search
+for(i in seq_len(nrow(hyper_grid))) {
+# fit model for ith hyperparameter combination
+fit <- ranger(
+formula = time.spent ~ .,
+data = advertising[1:4],
+num.trees = n_features * 10,
+mtry = hyper_grid$mtry[i],
+min.node.size = hyper_grid$min.node.size[i],
+replace = hyper_grid$replace[i],
+sample.fraction = hyper_grid$sample.fraction[i],
+verbose = FALSE,
+seed = 123,
+respect.unordered.factors = 'order',
+) 
+#export OOB error
+hyper_grid$rmse[i] <- sqrt(fit$prediction.error)
+} 
+#assess top 10 models
+hyper_grid %>%
+arrange(rmse) %>%
+mutate(perc_gain = (default_rmse - rmse) / default_rmse * 100) %>%
+head(10)
+```
